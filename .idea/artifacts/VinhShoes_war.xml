@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="VinhShoes:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <properties id="maven-jee-properties">
+      <options>
+        <module>VinhShoes</module>
+        <packaging>war</packaging>
+      </options>
+    </properties>
+    <root id="archive" name="VinhShoes-1.0-SNAPSHOT.war">
+      <element id="artifact" artifact-name="VinhShoes:war exploded" />
+    </root>
+  </artifact>
+</component>
