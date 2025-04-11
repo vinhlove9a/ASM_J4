@@ -25,7 +25,7 @@ public class HibernateUtil {
         Properties properties = new Properties();
         properties.put(Environment.DIALECT, "org.hibernate.dialect.SQLServer2016Dialect");
         properties.put(Environment.DRIVER, "com.microsoft.sqlserver.jdbc.SQLServerDriver");
-        properties.put(Environment.URL, "jdbc:sqlserver://localhost:1433;databaseName=ASM_JAVA4_BanGiay;encrypt=true;trustServerCertificate=true;");
+        properties.put(Environment.URL, "jdbc:sqlserver://localhost:1433;databaseName=SQL_ASM_JAVA4;encrypt=true;trustServerCertificate=true;");
         properties.put(Environment.USER, "sa");
         properties.put(Environment.PASS, "123");
         properties.put(Environment.SHOW_SQL, "true");

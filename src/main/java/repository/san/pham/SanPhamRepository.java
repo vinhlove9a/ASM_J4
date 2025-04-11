@@ -2,7 +2,8 @@ package repository.san.pham;
 
 import entity.san.pham.SanPham;
 import org.hibernate.Session;
-import org.hibernate.exception.ConstraintViolationException;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 import utility.HibernateUtil;
 
 import java.util.List;
@@ -14,103 +15,57 @@ public class SanPhamRepository {
         session = HibernateUtil.getFACTORY().openSession();
     }
 
-    /**
-     * Lấy tất cả sản phẩm bao gồm các thuộc tính liên quan
-     *
-     * @return Danh sách sản phẩm
-     */
     public List<SanPham> getAllSanPham() {
-        return session.createQuery(
-                "SELECT sp FROM SanPham sp " +
-                        "JOIN FETCH sp.chiTietSanPham ctp " +
-                        "JOIN FETCH ctp.thuongHieu th " +
-                        "JOIN FETCH ctp.mauSac ms " +
-                        "JOIN FETCH ctp.kichThuoc kt",
-                SanPham.class
-        ).list();
-    }
-
-    /**
-     * Lấy một sản phẩm theo id, bao gồm các thuộc tính liên quan
-     *
-     * @param id ID sản phẩm
-     * @return Thông tin sản phẩm
-     */
-    public SanPham getSanPhamById(Integer id) {
-        return session.createQuery(
-                "SELECT sp FROM SanPham sp " +
-                        "JOIN FETCH sp.chiTietSanPham ctp " +
-                        "JOIN FETCH ctp.thuongHieu th " +
-                        "JOIN FETCH ctp.mauSac ms " +
-                        "JOIN FETCH ctp.kichThuoc kt " +
-                        "WHERE sp.id = :id",
-                SanPham.class
-        ).setParameter("id", id).uniqueResult();
-    }
-
-    /**
-     * Thêm mới một sản phẩm
-     *
-     * @param sanPham Thông tin sản phẩm
-     */
-    public void addSanPham(SanPham sanPham) {
-        try {
-            session.getTransaction().begin();
-
-            if (sanPham.getChiTietSanPham().getThuongHieu() == null) {
-                throw new IllegalArgumentException("Thương hiệu không hợp lệ!");
-            }
-            if (sanPham.getChiTietSanPham().getMauSac() == null) {
-                throw new IllegalArgumentException("Màu sắc không hợp lệ!");
-            }
-            if (sanPham.getChiTietSanPham().getKichThuoc() == null) {
-                throw new IllegalArgumentException("Kích thước không hợp lệ!");
-            }
-
-            session.persist(sanPham);
-            session.getTransaction().commit();
-        } catch (ConstraintViolationException e) {
-            session.getTransaction().rollback();
-            throw new RuntimeException("Không thể thêm sản phẩm: Vi phạm ràng buộc!");
+        Transaction transaction = null;
+        List<SanPham> sanPhams = null;
+        try (Session session = HibernateUtil.getFACTORY().openSession()) {
+            transaction = session.beginTransaction();
+            sanPhams = session.createQuery("FROM SanPham", SanPham.class).getResultList();
+            transaction.commit();
         } catch (Exception e) {
-            session.getTransaction().rollback();
-            throw new RuntimeException("Lỗi khác xảy ra: " + e.getMessage());
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        }
+        return sanPhams;
+    }
+
+    public int getTongSoSanPham() {
+        try (Session session = HibernateUtil.getFACTORY().openSession()) {
+            String hql = "SELECT COUNT(*) FROM SanPham";
+            Query<Long> query = session.createQuery(hql, Long.class);
+            return query.uniqueResult().intValue();
         }
     }
 
-    /**
-     * Xóa một sản phẩm
-     *
-     * @param sanPham Thông tin sản phẩm
-     */
-    public void deleteSanPham(SanPham sanPham) {
-        try {
-            if (sanPham == null) {
-                System.out.println("SanPham không tồn tại, không thể xóa!");
-                return;
-            }
-            session.getTransaction().begin();
-            session.remove(sanPham); // Xóa sản phẩm
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            session.getTransaction().rollback(); // Rollback nếu xảy ra lỗi
-            e.printStackTrace();
+    public List<SanPham> getSanPhamTheoTrang(int trang, int soSanPhamMoiTrang) {
+        try (Session session = HibernateUtil.getFACTORY().openSession()) {
+            String hql = "FROM SanPham";
+            Query<SanPham> query = session.createQuery(hql, SanPham.class);
+            query.setFirstResult((trang - 1) * soSanPhamMoiTrang);
+            query.setMaxResults(soSanPhamMoiTrang);
+            return query.list();
         }
     }
 
-    /**
-     * Cập nhật thông tin sản phẩm
-     *
-     * @param sanPham Thông tin sản phẩm đã thay đổi
-     */
-    public void updateSanPham(SanPham sanPham) {
-        try {
-            session.getTransaction().begin();
-            session.merge(sanPham);
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            session.getTransaction().rollback();
-            e.printStackTrace();
+    public List<SanPham> getSanPhamNgauNhien(int soLuong) {
+        try (Session session = HibernateUtil.getFACTORY().openSession()) {
+            String hql = "FROM SanPham ORDER BY NEWID()";
+            Query<SanPham> query = session.createQuery(hql, SanPham.class);
+            query.setMaxResults(soLuong);
+            return query.list();
+        }
+    }
+
+    public static void main(String[] args) {
+        SanPhamRepository sanPhamRepository = new SanPhamRepository();
+        List<SanPham> danhSachSanPham = sanPhamRepository.getAllSanPham();
+        for (SanPham sp : danhSachSanPham) {
+            System.out.println("Tên sản phẩm: " + sp.getTenSanPham());
+            System.out.println("Mã sản phẩm: " + sp.getMaSanPham());
+            System.out.println("Hình ảnh: " + sp.getHinhAnh());
+            System.out.println("---------------------");
         }
     }
 }
