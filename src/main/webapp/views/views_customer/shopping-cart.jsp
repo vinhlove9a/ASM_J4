@@ -1,4 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -7,7 +8,7 @@
     <meta name="keywords" content="Male_Fashion, unica, creative, html"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
-    <title>Thời Trang Nam | Giỏ Hàng</title>
+    <title>Thời Trang Nam | Mẫu</title>
 
     <!-- Google Font -->
     <link
@@ -16,6 +17,7 @@
     />
 
     <!-- Css Styles -->
+
     <link rel="stylesheet" href="${pageContext.request.contextPath}/views/views_customer/css/bootstrap.min.css"
           type="text/css"/>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/views/views_customer/css/font-awesome.min.css"
@@ -95,12 +97,117 @@
                 <a href="#" class="search-switch"
                 ><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/search.png" alt=""
                 /></a>
-                <a href="#"><${pageContext.request.contextPath}/views/views_customer/img src="img/icon/heart.png" alt=""/></a>
+                <a href="#"><${pageContext.request.contextPath}/views/views_customer/img src="img/icon/heart.png"
+                    alt=""/></a>
                 <a href="#"
-                ><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/cart.png" alt=""/> <span>0</span></a
+                ><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/cart.png" alt=""/>
+                    <span>0</span></a
                 >
 
-                <a href="${pageContext.request.contextPath}/cua-hang/hien-thi" class="btn btn-primary btn-sm">Đăng nhập</a>
+                <!-- Modal -->
+                <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel"
+                     aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Đăng nhập / Đăng ký</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Đóng"></button>
+                            </div>
+                            <div class="modal-body" id="modalContent">
+                                <!-- Nội dung được tải từ server -->
+                                <div class="text-center py-3">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Đang tải...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nút mở modal -->
+                <c:choose>
+                    <c:when test="${not empty sessionScope.user}">
+                        <!-- Đã đăng nhập - hiển thị menu -->
+                        <div class="dropdown">
+                            <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="userMenuButton"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    ${sessionScope.user.tenKhachHang}
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="userMenuButton">
+                                <li><a class="dropdown-item" href="#">Thông tin tài khoản</a></li>
+                                <li><a class="dropdown-item" href="#">Lịch sử mua hàng</a></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item"
+                                       href="${pageContext.request.contextPath}/LoginControl?action=logout">Đăng
+                                    xuất</a></li>
+                            </ul>
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <!-- Chưa đăng nhập - hiển thị nút đăng nhập -->
+                        <a href="#" class="btn btn-primary btn-sm" id="loginBtn">Đăng nhập</a>
+                    </c:otherwise>
+                </c:choose>
+
+                <!-- Thông báo -->
+                <c:if test="${not empty sessionScope.success}">
+                    <script>alert("${sessionScope.success}");</script>
+                    <c:remove var="success" scope="session"/>
+                </c:if>
+                <c:if test="${not empty sessionScope.error}">
+                    <script>alert("${sessionScope.error}");</script>
+                    <c:remove var="error" scope="session"/>
+                </c:if>
+
+                <!-- Nếu cần mở modal -->
+                <c:if test="${sessionScope.openLoginModal == true}">
+                    <script>
+                        window.addEventListener('DOMContentLoaded', () => {
+                            fetch('${pageContext.request.contextPath}/LoginControl?action=modal')
+                                .then(res => res.text())
+                                .then(html => {
+                                    document.getElementById('modalContent').innerHTML = html;
+                                    new bootstrap.Modal(document.getElementById('loginModal')).show();
+                                })
+                                .catch(err => console.error('Lỗi khi tải modal:', err));
+                        });
+                    </script>
+                    <c:remove var="openLoginModal" scope="session"/>
+                </c:if>
+
+                <script>
+                    // Nút mở modal
+                    document.getElementById('loginBtn').addEventListener('click', function (e) {
+                        e.preventDefault();
+                        document.getElementById('modalContent').innerHTML = `
+            <div class="text-center py-3">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Đang tải...</span>
+                </div>
+            </div>
+        `;
+
+                        fetch('${pageContext.request.contextPath}/LoginControl?action=modal')
+                            .then(res => res.text())
+                            .then(html => {
+                                document.getElementById('modalContent').innerHTML = html;
+                                new bootstrap.Modal(document.getElementById('loginModal')).show();
+
+                                // Kích hoạt tab mặc định sau khi tải
+                                const loginTab = new bootstrap.Tab(document.getElementById('login-tab'));
+                                loginTab.show();
+                            })
+                            .catch(err => {
+                                console.error('Lỗi khi tải modal:', err);
+                                document.getElementById('modalContent').innerHTML = '<div class="alert alert-danger">Không thể tải form đăng nhập</div>';
+                            });
+                    });
+                </script>
+
             </div>
         </div>
     </div>
@@ -136,92 +243,71 @@
                         <thead>
                         <tr>
                             <th>Sản phẩm</th>
+                            <th>Hình ảnh</th>
                             <th>Số lượng</th>
+                            <th>Đơn giá</th>
                             <th>Tổng cộng</th>
-                            <th></th>
+                            <th>Hành động</th>
                         </tr>
                         </thead>
                         <tbody>
-                        <tr>
-                            <td class="product__cart__item">
-                                <div class="product__cart__item__pic">
-                                    <img src="${pageContext.request.contextPath}/views/views_customer/img/shopping-cart/cart-1.jpg" alt=""/>
-                                </div>
-                                <div class="product__cart__item__text">
-                                    <h6>Áo thun túi tương phản</h6>
-                                    <h5>$98.49</h5>
-                                </div>
-                            </td>
-                            <td class="quantity__item">
-                                <div class="quantity">
-                                    <div class="pro-qty-2">
-                                        <input type="text" value="1"/>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="cart__price">$ 30.00</td>
-                            <td class="cart__close"><i class="fa fa-close"></i></td>
-                        </tr>
-                        <tr>
-                            <td class="product__cart__item">
-                                <div class="product__cart__item__pic">
-                                    <img src="${pageContext.request.contextPath}/views/views_customer/img/shopping-cart/cart-2.jpg" alt=""/>
-                                </div>
-                                <div class="product__cart__item__text">
-                                    <h6>Nón có họa tiết chéo</h6>
-                                    <h5>$98.49</h5>
-                                </div>
-                            </td>
-                            <td class="quantity__item">
-                                <div class="quantity">
-                                    <div class="pro-qty-2">
-                                        <input type="text" value="1"/>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="cart__price">$ 32.50</td>
-                            <td class="cart__close"><i class="fa fa-close"></i></td>
-                        </tr>
-                        <tr>
-                            <td class="product__cart__item">
-                                <div class="product__cart__item__pic">
-                                    <img src="${pageContext.request.contextPath}/views/views_customer/img/shopping-cart/cart-3.jpg" alt=""/>
-                                </div>
-                                <div class="product__cart__item__text">
-                                    <h6>Khăn quàng cổ cơ bản</h6>
-                                    <h5>$98.49</h5>
-                                </div>
-                            </td>
-                            <td class="quantity__item">
-                                <div class="quantity">
-                                    <div class="pro-qty-2">
-                                        <input type="text" value="1"/>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="cart__price">$ 47.00</td>
-                            <td class="cart__close"><i class="fa fa-close"></i></td>
-                        </tr>
-                        <tr>
-                            <td class="product__cart__item">
-                                <div class="product__cart__item__pic">
-                                    <img src="${pageContext.request.contextPath}/views/views_customer/img/shopping-cart/cart-4.jpg" alt=""/>
-                                </div>
-                                <div class="product__cart__item__text">
-                                    <h6>Khăn quàng cổ cơ bản</h6>
-                                    <h5>$98.49</h5>
-                                </div>
-                            </td>
-                            <td class="quantity__item">
-                                <div class="quantity">
-                                    <div class="pro-qty-2">
-                                        <input type="text" value="1"/>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="cart__price">$ 30.00</td>
-                            <td class="cart__close"><i class="fa fa-close"></i></td>
-                        </tr>
+                        <!-- Kiểm tra giỏ hàng trống -->
+                        <c:if test="${cartItems == null || cartItems.isEmpty()}">
+                            <tr>
+                                <td colspan="6" class="text-center">
+                                    Giỏ hàng của bạn hiện đang trống.
+                                    <a href="${pageContext.request.contextPath}/cua-hang/hien-thi"
+                                       class="btn btn-primary">Tiếp tục mua sắm</a>
+                                </td>
+                            </tr>
+                        </c:if>
+
+                        <!-- Hiển thị sản phẩm trong giỏ hàng -->
+                        <c:if test="${cartItems != null && !cartItems.isEmpty()}">
+                            <c:forEach var="item" items="${cartItems}">
+                                <tr>
+                                    <!-- Tên sản phẩm -->
+                                    <td>
+                                        <c:if test="${item.sanPham != null}">
+                                            ${item.sanPham.tenSanPham}
+                                        </c:if>
+                                    </td>
+
+                                    <!-- Hình ảnh sản phẩm -->
+                                    <td>
+                                        <c:if test="${item.sanPham != null}">
+                                            <img src="${pageContext.request.contextPath}/${item.sanPham.hinhAnh != null ? item.sanPham.hinhAnh : 'views/views_customer/img/default.jpg'}"
+                                                 alt="${item.sanPham.tenSanPham}"
+                                                 style="width: 100px; height: auto;"/>
+                                        </c:if>
+                                    </td>
+
+                                    <!-- Số lượng sản phẩm -->
+                                    <td>${item.soLuong}</td>
+
+                                    <!-- Đơn giá -->
+                                    <td>
+                                        <c:if test="${item.sanPham.chiTietSanPham != null}">
+                                            ${item.sanPham.chiTietSanPham.donGia}
+                                        </c:if>
+                                    </td>
+
+                                    <!-- Tổng cộng -->
+                                    <td>
+                                        <c:if test="${item.sanPham.chiTietSanPham != null}">
+                                            ${item.soLuong * item.sanPham.chiTietSanPham.donGia}
+                                        </c:if>
+                                    </td>
+
+                                    <!-- Hành động xóa sản phẩm -->
+                                    <td>
+                                        <a href="${pageContext.request.contextPath}/gio-hang/xoa?productId=${item.sanPham.id}&quantityToRemove=1" class="btn btn-danger">
+                                            <i class="fa fa-trash"></i> Xóa
+                                        </a>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                        </c:if>
                         </tbody>
                     </table>
                 </div>
@@ -233,9 +319,7 @@
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-6">
                         <div class="continue__btn update__btn">
-                            <a href="#"
-                            ><i class="fa fa-spinner"></i> Cập nhật giỏ hàng</a
-                            >
+                            <a href="#"><i class="fa fa-spinner"></i> Cập nhật giỏ hàng</a>
                         </div>
                     </div>
                 </div>
@@ -243,18 +327,36 @@
             <div class="col-lg-4">
                 <div class="cart__discount">
                     <h6>Mã giảm giá</h6>
-                    <form action="#">
-                        <input type="text" placeholder="Mã giảm giá"/>
+                    <form action="#" method="post">
+                        <input type="text" name="maGiamGia" placeholder="Nhập mã giảm giá"/>
                         <button type="submit">Áp dụng</button>
                     </form>
                 </div>
                 <div class="cart__total">
                     <h6>Tổng giỏ hàng</h6>
-                    <ul>
-                        <li>Tạm tính <span>$ 169.50</span></li>
-                        <li>Tổng cộng <span>$ 169.50</span></li>
-                    </ul>
-                    <a href="#" class="primary-btn">Tiến hành thanh toán</a>
+
+                    <!-- Kiểm tra dữ liệu tạm tính và tổng cộng -->
+                    <c:choose>
+                        <c:when test="${tongTamTinh == null || tongCong == null}">
+                            <!-- Hiển thị giá trị mặc định khi không có dữ liệu -->
+                            <ul>
+                                <li>Tạm tính <span>0 VNĐ</span></li>
+                                <li>Tổng cộng <span>0 VNĐ</span></li>
+                            </ul>
+                        </c:when>
+
+                        <c:otherwise>
+                            <!-- Hiển thị dữ liệu thực tế -->
+                            <ul>
+                                <li>Tạm tính <span>${tongTamTinh} VNĐ</span></li>
+                                <li>Tổng cộng <span>${tongCong} VNĐ</span></li>
+                            </ul>
+                        </c:otherwise>
+                    </c:choose>
+
+                    <!-- Nút tiến hành thanh toán -->
+                    <a href="${pageContext.request.contextPath}/thanh-toan/hien-thi" class="primary-btn">Tiến hành thanh
+                        toán</a>
                 </div>
             </div>
         </div>
@@ -286,7 +388,8 @@
                         Khách hàng là trung tâm của mô hình kinh doanh độc đáo của chúng
                         tôi, bao gồm thiết kế.
                     </p>
-                    <a href="#"><img src="${pageContext.request.contextPath}/views/views_customer/img/payment.png" alt=""/></a>
+                    <a href="#"><img src="${pageContext.request.contextPath}/views/views_customer/img/payment.png"
+                                     alt=""/></a>
                 </div>
             </div>
             <div class="col-lg-2 offset-lg-1 col-md-3 col-sm-6">
@@ -359,5 +462,6 @@
 <script src="${pageContext.request.contextPath}/views/views_customer/js/mixitup.min.js"></script>
 <script src="${pageContext.request.contextPath}/views/views_customer/js/owl.carousel.min.js"></script>
 <script src="${pageContext.request.contextPath}/views/views_customer/js/main.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

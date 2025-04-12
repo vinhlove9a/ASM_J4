@@ -39,7 +39,8 @@ public class HoaDon {
 
     @Column(name = "GiamGia", nullable = false)
     private Double giamGia;
-
+    @Column(name = "PhuongThucThanhToan")
+    private String phuongThucThanhToan;
     @Column(name = "NgayTao")
     @Temporal(TemporalType.TIMESTAMP)
     private Date ngayTao;

@@ -29,6 +29,9 @@ public class KhachHang {
     @Column(name = "SDT", unique = true, nullable = false)
     private String sdt;
 
+    @Column(name = "MatKhau")
+    private String matKhau;
+
     @Column(name = "GioiTinh", nullable = false)
     private Boolean gioiTinh;
 

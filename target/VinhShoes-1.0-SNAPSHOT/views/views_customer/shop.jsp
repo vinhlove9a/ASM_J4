@@ -105,8 +105,109 @@
                     <span>0</span></a
                 >
 
-                <a href="${pageContext.request.contextPath}/cua-hang/hien-thi" class="btn btn-primary btn-sm">Đăng
-                    nhập</a>
+                <!-- Modal -->
+                <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel"
+                     aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Đăng nhập / Đăng ký</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Đóng"></button>
+                            </div>
+                            <div class="modal-body" id="modalContent">
+                                <!-- Nội dung được tải từ server -->
+                                <div class="text-center py-3">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Đang tải...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nút mở modal -->
+                <c:choose>
+                    <c:when test="${not empty sessionScope.user}">
+                        <!-- Đã đăng nhập - hiển thị menu -->
+                        <div class="dropdown">
+                            <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="userMenuButton"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    ${sessionScope.user.tenKhachHang}
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="userMenuButton">
+                                <li><a class="dropdown-item" href="#">Thông tin tài khoản</a></li>
+                                <li><a class="dropdown-item" href="#">Lịch sử mua hàng</a></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item"
+                                       href="${pageContext.request.contextPath}/LoginControl?action=logout">Đăng
+                                    xuất</a></li>
+                            </ul>
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <!-- Chưa đăng nhập - hiển thị nút đăng nhập -->
+                        <a href="#" class="btn btn-primary btn-sm" id="loginBtn">Đăng nhập</a>
+                    </c:otherwise>
+                </c:choose>
+
+                <!-- Thông báo -->
+                <c:if test="${not empty sessionScope.success}">
+                    <script>alert("${sessionScope.success}");</script>
+                    <c:remove var="success" scope="session"/>
+                </c:if>
+                <c:if test="${not empty sessionScope.error}">
+                    <script>alert("${sessionScope.error}");</script>
+                    <c:remove var="error" scope="session"/>
+                </c:if>
+
+                <!-- Nếu cần mở modal -->
+                <c:if test="${sessionScope.openLoginModal == true}">
+                    <script>
+                        window.addEventListener('DOMContentLoaded', () => {
+                            fetch('${pageContext.request.contextPath}/LoginControl?action=modal')
+                                .then(res => res.text())
+                                .then(html => {
+                                    document.getElementById('modalContent').innerHTML = html;
+                                    new bootstrap.Modal(document.getElementById('loginModal')).show();
+                                })
+                                .catch(err => console.error('Lỗi khi tải modal:', err));
+                        });
+                    </script>
+                    <c:remove var="openLoginModal" scope="session"/>
+                </c:if>
+
+                <script>
+                    // Nút mở modal
+                    document.getElementById('loginBtn').addEventListener('click', function (e) {
+                        e.preventDefault();
+                        document.getElementById('modalContent').innerHTML = `
+            <div class="text-center py-3">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Đang tải...</span>
+                </div>
+            </div>
+        `;
+
+                        fetch('${pageContext.request.contextPath}/LoginControl?action=modal')
+                            .then(res => res.text())
+                            .then(html => {
+                                document.getElementById('modalContent').innerHTML = html;
+                                new bootstrap.Modal(document.getElementById('loginModal')).show();
+
+                                // Kích hoạt tab mặc định sau khi tải
+                                const loginTab = new bootstrap.Tab(document.getElementById('login-tab'));
+                                loginTab.show();
+                            })
+                            .catch(err => {
+                                console.error('Lỗi khi tải modal:', err);
+                                document.getElementById('modalContent').innerHTML = '<div class="alert alert-danger">Không thể tải form đăng nhập</div>';
+                            });
+                    });
+                </script>
             </div>
         </div>
     </div>
@@ -216,7 +317,8 @@
                                             <ul>
                                                 <c:forEach var="mauSac" items="${danhSachMauSac}">
                                                     <li>
-                                                        <a href="#" class="mau-sac-item" style="background-color:${mauSac.maMauSac};">
+                                                        <a href="#" class="mau-sac-item"
+                                                           style="background-color:${mauSac.maMauSac};">
                                                                 ${mauSac.tenMauSac}
                                                         </a>
                                                     </li>
@@ -302,7 +404,13 @@
                                 </div>
                                 <div class="product__item__text">
                                     <h6>${sanPham.tenSanPham}</h6>
-                                    <a href="#" class="add-cart">+ Thêm vào giỏ hàng</a>
+                                    <form action="${pageContext.request.contextPath}/gio-hang/them" method="post">
+                                        <input type="hidden" name="productId" value="${sanPham.id}"/>
+                                        <input type="hidden" name="soLuong" value="1"/>
+                                        <button type="submit" class="btn btn-primary add-cart">+ Thêm vào giỏ hàng
+                                        </button>
+
+                                    </form>
                                     <div class="rating">
                                         <i class="fa fa-star-o"></i>
                                         <i class="fa fa-star-o"></i>
@@ -310,7 +418,9 @@
                                         <i class="fa fa-star-o"></i>
                                         <i class="fa fa-star-o"></i>
                                     </div>
-                                    <h5>${sanPham.chiTietSanPham.donGia}</h5>
+                                    <h5>${sanPham.chiTietSanPham.donGia} VNĐ</h5>
+                                    <h6>Số lượng tồn: ${sanPham.chiTietSanPham.soLuong}</h6>
+                                    <!-- Hiển thị số lượng tồn kho -->
                                     <div class="product__color__select">
                                         <label for="pc-40">
                                             <input type="radio" id="pc-40"/>
@@ -449,5 +559,6 @@
 <script src="${pageContext.request.contextPath}/views/views_customer/js/mixitup.min.js"></script>
 <script src="${pageContext.request.contextPath}/views/views_customer/js/owl.carousel.min.js"></script>
 <script src="${pageContext.request.contextPath}/views/views_customer/js/main.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -26,4 +26,15 @@ public class SanPham {
     @ManyToOne
     @JoinColumn(name = "IDChiTietSanPham", referencedColumnName = "id")
     private ChiTietSanPham chiTietSanPham;
+
+    @Override
+    public String toString() {
+        return "SanPham{" +
+                "id=" + id +
+                ", maSanPham='" + maSanPham + '\'' +
+                ", tenSanPham='" + tenSanPham + '\'' +
+                ", hinhAnh='" + hinhAnh + '\'' +
+                ", chiTietSanPham=" + chiTietSanPham +
+                '}';
+    }
 }

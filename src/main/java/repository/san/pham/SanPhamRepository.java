@@ -1,5 +1,6 @@
 package repository.san.pham;
 
+import entity.san.pham.ChiTietSanPham;
 import entity.san.pham.SanPham;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -58,6 +59,36 @@ public class SanPhamRepository {
         }
     }
 
+    // Phương thức lấy sản phẩm theo ID
+    public SanPham laySanPhamTheoId(int idSanPham) {
+        Transaction giaoTac = null;
+        SanPham sanPham = null;
+        try (Session session = HibernateUtil.getFACTORY().openSession()) {
+            giaoTac = session.beginTransaction();
+
+            // Truy vấn sản phẩm theo ID
+            sanPham = session.get(SanPham.class, idSanPham);
+
+            giaoTac.commit();
+        } catch (Exception e) {
+            if (giaoTac != null) {
+                giaoTac.rollback();
+            }
+            e.printStackTrace();
+        }
+        return sanPham;
+    }
+    public void update(ChiTietSanPham chiTietSanPham) {
+        Transaction transaction = null;
+        try (Session session = HibernateUtil.getFACTORY().openSession()) {
+            transaction = session.beginTransaction();
+            session.update(chiTietSanPham); // Lưu thông tin cập nhật vào DB
+            transaction.commit(); // Hoàn thành giao dịch
+        } catch (Exception e) {
+            if (transaction != null) transaction.rollback(); // Rollback nếu có lỗi
+            e.printStackTrace();
+        }
+    }
     public static void main(String[] args) {
         SanPhamRepository sanPhamRepository = new SanPhamRepository();
         List<SanPham> danhSachSanPham = sanPhamRepository.getAllSanPham();

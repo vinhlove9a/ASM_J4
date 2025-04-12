@@ -1,4 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -100,8 +101,110 @@
                 ><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/cart.png" alt=""/> <span>0</span></a
                 >
 
-                <a href="${pageContext.request.contextPath}/trang-chu/hien-thi" class="btn btn-primary btn-sm">Đăng
-                    nhập</a>
+                <!-- Modal -->
+                <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel"
+                     aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Đăng nhập / Đăng ký</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Đóng"></button>
+                            </div>
+                            <div class="modal-body" id="modalContent">
+                                <!-- Nội dung được tải từ server -->
+                                <div class="text-center py-3">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Đang tải...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nút mở modal -->
+                <c:choose>
+                    <c:when test="${not empty sessionScope.user}">
+                        <!-- Đã đăng nhập - hiển thị menu -->
+                        <div class="dropdown">
+                            <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="userMenuButton"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    ${sessionScope.user.tenKhachHang}
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="userMenuButton">
+                                <li><a class="dropdown-item" href="#">Thông tin tài khoản</a></li>
+                                <li><a class="dropdown-item" href="#">Lịch sử mua hàng</a></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item"
+                                       href="${pageContext.request.contextPath}/LoginControl?action=logout">Đăng
+                                    xuất</a></li>
+                            </ul>
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <!-- Chưa đăng nhập - hiển thị nút đăng nhập -->
+                        <a href="#" class="btn btn-primary btn-sm" id="loginBtn">Đăng nhập</a>
+                    </c:otherwise>
+                </c:choose>
+
+                <!-- Thông báo -->
+                <c:if test="${not empty sessionScope.success}">
+                    <script>alert("${sessionScope.success}");</script>
+                    <c:remove var="success" scope="session"/>
+                </c:if>
+                <c:if test="${not empty sessionScope.error}">
+                    <script>alert("${sessionScope.error}");</script>
+                    <c:remove var="error" scope="session"/>
+                </c:if>
+
+                <!-- Nếu cần mở modal -->
+                <c:if test="${sessionScope.openLoginModal == true}">
+                    <script>
+                        window.addEventListener('DOMContentLoaded', () => {
+                            fetch('${pageContext.request.contextPath}/LoginControl?action=modal')
+                                .then(res => res.text())
+                                .then(html => {
+                                    document.getElementById('modalContent').innerHTML = html;
+                                    new bootstrap.Modal(document.getElementById('loginModal')).show();
+                                })
+                                .catch(err => console.error('Lỗi khi tải modal:', err));
+                        });
+                    </script>
+                    <c:remove var="openLoginModal" scope="session"/>
+                </c:if>
+
+                <script>
+                    // Nút mở modal
+                    document.getElementById('loginBtn').addEventListener('click', function (e) {
+                        e.preventDefault();
+                        document.getElementById('modalContent').innerHTML = `
+            <div class="text-center py-3">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Đang tải...</span>
+                </div>
+            </div>
+        `;
+
+                        fetch('${pageContext.request.contextPath}/LoginControl?action=modal')
+                            .then(res => res.text())
+                            .then(html => {
+                                document.getElementById('modalContent').innerHTML = html;
+                                new bootstrap.Modal(document.getElementById('loginModal')).show();
+
+                                // Kích hoạt tab mặc định sau khi tải
+                                const loginTab = new bootstrap.Tab(document.getElementById('login-tab'));
+                                loginTab.show();
+                            })
+                            .catch(err => {
+                                console.error('Lỗi khi tải modal:', err);
+                                document.getElementById('modalContent').innerHTML = '<div class="alert alert-danger">Không thể tải form đăng nhập</div>';
+                            });
+                    });
+                </script>
+
             </div>
         </div>
     </div>
@@ -131,143 +234,49 @@
 <section class="checkout spad">
     <div class="container">
         <div class="checkout__form">
-            <form action="#">
+            <form action="${pageContext.request.contextPath}/thanh-toan/hoan-tat" method="post">
                 <div class="row">
+                    <!-- Thông tin khách hàng -->
                     <div class="col-lg-8 col-md-6">
-                        <h6 class="coupon__code">
-                            <span class="icon_tag_alt"></span> Có mã giảm giá?
-                            <a href="#">Nhấn vào đây</a> để nhập mã
-                        </h6>
-                        <h6 class="checkout__title">Chi tiết thanh toán</h6>
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <div class="checkout__input">
-                                    <p>Họ<span>*</span></p>
-                                    <input type="text"/>
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="checkout__input">
-                                    <p>Tên<span>*</span></p>
-                                    <input type="text"/>
-                                </div>
-                            </div>
+                        <h6 class="checkout__title">Thông tin khách hàng</h6>
+                        <div class="checkout__input">
+                            <p>Mã khách hàng</p>
+                            <input type="text" name="maKhachHang" id="maKhachHang" placeholder="Hệ thống tạo tự động" readonly />
                         </div>
                         <div class="checkout__input">
-                            <p>Quốc gia<span>*</span></p>
-                            <input type="text"/>
+                            <p>Họ và tên</p>
+                            <input type="text" name="hoKhachHang" id="hoKhachHang" placeholder="Nhập họ và tên" required />
                         </div>
                         <div class="checkout__input">
-                            <p>Địa chỉ<span>*</span></p>
-                            <input
-                                    type="text"
-                                    placeholder="Địa chỉ đường phố"
-                                    class="checkout__input__add"
-                            />
-                            <input
-                                    type="text"
-                                    placeholder="Căn hộ, phòng, đơn vị, v.v. (tùy chọn)"
-                            />
+                            <p>Địa chỉ</p>
+                            <input type="text" name="diaChi" id="diaChi" placeholder="Nhập địa chỉ" required />
                         </div>
                         <div class="checkout__input">
-                            <p>Thành phố<span>*</span></p>
-                            <input type="text"/>
+                            <p>Số điện thoại</p>
+                            <input type="text" name="soDienThoai" id="soDienThoai" placeholder="Nhập số điện thoại" required />
                         </div>
                         <div class="checkout__input">
-                            <p>Quận/Huyện<span>*</span></p>
-                            <input type="text"/>
-                        </div>
-                        <div class="checkout__input">
-                            <p>Mã bưu điện / ZIP<span>*</span></p>
-                            <input type="text"/>
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <div class="checkout__input">
-                                    <p>Điện thoại<span>*</span></p>
-                                    <input type="text"/>
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="checkout__input">
-                                    <p>Email<span>*</span></p>
-                                    <input type="text"/>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="checkout__input__checkbox">
-                            <label for="acc">
-                                Tạo tài khoản?
-                                <input type="checkbox" id="acc"/>
-                                <span class="checkmark"></span>
-                            </label>
-                            <p>
-                                Tạo tài khoản bằng cách nhập thông tin bên dưới. Nếu bạn là
-                                khách hàng cũ, vui lòng đăng nhập ở đầu trang
-                            </p>
-                        </div>
-                        <div class="checkout__input">
-                            <p>Mật khẩu tài khoản<span>*</span></p>
-                            <input type="text"/>
-                        </div>
-                        <div class="checkout__input__checkbox">
-                            <label for="diff-acc">
-                                Ghi chú về đơn hàng của bạn, ví dụ, ghi chú đặc biệt cho
-                                việc giao hàng
-                                <input type="checkbox" id="diff-acc"/>
-                                <span class="checkmark"></span>
-                            </label>
-                        </div>
-                        <div class="checkout__input">
-                            <p>Ghi chú đơn hàng<span>*</span></p>
-                            <input
-                                    type="text"
-                                    placeholder="Ghi chú về đơn hàng của bạn, ví dụ, ghi chú đặc biệt cho việc giao hàng."
-                            />
+                            <p>Phương thức thanh toán</p>
+                            <select name="phuongThucThanhToan" id="phuongThucThanhToan" onchange="handlePaymentMethod(this.value)" required>
+                                <option value="COD">Thanh toán khi nhận hàng</option>
+                                <option value="Paypal">Thanh toán qua Paypal</option>
+                            </select>
                         </div>
                     </div>
+
+                    <!-- Thông tin đơn hàng -->
                     <div class="col-lg-4 col-md-6">
                         <div class="checkout__order">
-                            <h4 class="order__title">Đơn hàng của bạn</h4>
-                            <div class="checkout__order__products">
-                                Sản phẩm <span>Tổng</span>
-                            </div>
+                            <h4 class="order__title">Đơn hàng</h4>
                             <ul class="checkout__total__products">
-                                <li>01. Vanilla salted caramel <span>$ 300.0</span></li>
-                                <li>02. German chocolate <span>$ 170.0</span></li>
-                                <li>03. Sweet autumn <span>$ 170.0</span></li>
-                                <li>04. Cluten free mini dozen <span>$ 110.0</span></li>
+                                <c:forEach var="item" items="${cartItems}">
+                                    <li>${item.sanPham.tenSanPham} x ${item.soLuong} <span>${item.soLuong * item.sanPham.chiTietSanPham.donGia} VNĐ</span></li>
+                                </c:forEach>
                             </ul>
                             <ul class="checkout__total__all">
-                                <li>Tổng phụ <span>$750.99</span></li>
-                                <li>Tổng cộng <span>$750.99</span></li>
+                                <li>Tổng tiền: <span>${tongTien} VNĐ</span></li>
                             </ul>
-                            <div class="checkout__input__checkbox">
-                                <label for="acc-or">
-                                    Tạo tài khoản?
-                                    <input type="checkbox" id="acc-or"/>
-                                    <span class="checkmark"></span>
-                                </label>
-                            </div>
-                            <p>
-                                Lorem ipsum dolor sit amet, consectetur adip elit, sed do
-                                eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                            </p>
-                            <div class="checkout__input__checkbox">
-                                <label for="payment">
-                                    Thanh toán bằng séc
-                                    <input type="checkbox" id="payment"/>
-                                    <span class="checkmark"></span>
-                                </label>
-                            </div>
-                            <div class="checkout__input__checkbox">
-                                <label for="paypal">
-                                    Paypal
-                                    <input type="checkbox" id="paypal"/>
-                                    <span class="checkmark"></span>
-                                </label>
-                            </div>
-                            <button type="submit" class="site-btn">THANH TOÁN</button>
+                            <button type="submit" class="site-btn">XÁC NHẬN THANH TOÁN</button>
                         </div>
                     </div>
                 </div>
@@ -275,6 +284,43 @@
         </div>
     </div>
 </section>
+
+<script>
+    // Hàm xử lý thay đổi phương thức thanh toán
+    function handlePaymentMethod(method) {
+        const hoKhachHang = document.getElementById('hoKhachHang');
+        const diaChi = document.getElementById('diaChi');
+        const soDienThoai = document.getElementById('soDienThoai');
+
+        if (method === 'Paypal') {
+            // Điền giá trị mặc định cho các trường
+            hoKhachHang.value = 'Mặc định';
+            diaChi.value = 'Mặc định';
+            soDienThoai.value = '0000000000';
+
+            // Các trường không bắt buộc nếu chọn Paypal
+            hoKhachHang.required = false;
+            diaChi.required = false;
+            soDienThoai.required = false;
+        } else {
+            // Xóa giá trị mặc định khi chọn Thanh toán khi nhận hàng (COD)
+            hoKhachHang.value = '';
+            diaChi.value = '';
+            soDienThoai.value = '';
+
+            // Bật yêu cầu nhập dữ liệu đầy đủ
+            hoKhachHang.required = true;
+            diaChi.required = true;
+            soDienThoai.required = true;
+        }
+    }
+
+    // Đặt trạng thái mặc định khi tải trang
+    document.addEventListener('DOMContentLoaded', () => {
+        const phuongThucThanhToan = document.getElementById('phuongThucThanhToan');
+        handlePaymentMethod(phuongThucThanhToan.value); // Kiểm tra giá trị phương thức thanh toán mặc định
+    });
+</script>
 <!-- Checkout Section End -->
 
 <!-- Footer Section Begin -->
@@ -375,5 +421,6 @@
 <script src="${pageContext.request.contextPath}/views/views_customer/js/mixitup.min.js"></script>
 <script src="${pageContext.request.contextPath}/views/views_customer/js/owl.carousel.min.js"></script>
 <script src="${pageContext.request.contextPath}/views/views_customer/js/main.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

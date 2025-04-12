@@ -1,4 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -16,6 +17,7 @@
     />
 
     <!-- Css Styles -->
+
     <link rel="stylesheet" href="${pageContext.request.contextPath}/views/views_customer/css/bootstrap.min.css"
           type="text/css"/>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/views/views_customer/css/font-awesome.min.css"
@@ -74,7 +76,8 @@
         <div class="col-lg-6 col-md-6">
             <nav class="header__menu mobile-menu">
                 <ul>
-                    <li class="active"><a href="${pageContext.request.contextPath}/trang-chu/hien-thi">Trang chủ</a></li>
+                    <li class="active"><a href="${pageContext.request.contextPath}/trang-chu/hien-thi">Trang chủ</a>
+                    </li>
                     <li><a href="${pageContext.request.contextPath}/cua-hang/hien-thi">Cửa hàng</a></li>
                     <li><a href="${pageContext.request.contextPath}/trang-chu/hien-thi">Blog</a></li>
                     <li><a href="${pageContext.request.contextPath}/trang-chu/hien-thi">Liên hệ</a></li>
@@ -93,12 +96,116 @@
                 <a href="#" class="search-switch"
                 ><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/search.png" alt=""
                 /></a>
-                <a href="#"><${pageContext.request.contextPath}/views/views_customer/img src="img/icon/heart.png" alt=""/></a>
+                <a href="#"><${pageContext.request.contextPath}/views/views_customer/img src="img/icon/heart.png"
+                    alt=""/></a>
                 <a href="#"
-                ><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/cart.png" alt=""/> <span>0</span></a
+                ><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/cart.png" alt=""/>
+                    <span>0</span></a
                 >
+                <!-- Modal -->
+                <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel"
+                     aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Đăng nhập / Đăng ký</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Đóng"></button>
+                            </div>
+                            <div class="modal-body" id="modalContent">
+                                <!-- Nội dung được tải từ server -->
+                                <div class="text-center py-3">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Đang tải...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                <a href="${pageContext.request.contextPath}/trang-chu/hien-thi" class="btn btn-primary btn-sm">Đăng nhập</a>
+                <!-- Nút mở modal -->
+                <c:choose>
+                    <c:when test="${not empty sessionScope.user}">
+                        <!-- Đã đăng nhập - hiển thị menu -->
+                        <div class="dropdown">
+                            <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="userMenuButton"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    ${sessionScope.user.tenKhachHang}
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="userMenuButton">
+                                <li><a class="dropdown-item" href="#">Thông tin tài khoản</a></li>
+                                <li><a class="dropdown-item" href="#">Lịch sử mua hàng</a></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item"
+                                       href="${pageContext.request.contextPath}/LoginControl?action=logout">Đăng
+                                    xuất</a></li>
+                            </ul>
+                        </div>
+                    </c:when>
+                    <c:otherwise>
+                        <!-- Chưa đăng nhập - hiển thị nút đăng nhập -->
+                        <a href="#" class="btn btn-primary btn-sm" id="loginBtn">Đăng nhập</a>
+                    </c:otherwise>
+                </c:choose>
+
+                <!-- Thông báo -->
+                <c:if test="${not empty sessionScope.success}">
+                    <script>alert("${sessionScope.success}");</script>
+                    <c:remove var="success" scope="session"/>
+                </c:if>
+                <c:if test="${not empty sessionScope.error}">
+                    <script>alert("${sessionScope.error}");</script>
+                    <c:remove var="error" scope="session"/>
+                </c:if>
+
+                <!-- Nếu cần mở modal -->
+                <c:if test="${sessionScope.openLoginModal == true}">
+                    <script>
+                        window.addEventListener('DOMContentLoaded', () => {
+                            fetch('${pageContext.request.contextPath}/LoginControl?action=modal')
+                                .then(res => res.text())
+                                .then(html => {
+                                    document.getElementById('modalContent').innerHTML = html;
+                                    new bootstrap.Modal(document.getElementById('loginModal')).show();
+                                })
+                                .catch(err => console.error('Lỗi khi tải modal:', err));
+                        });
+                    </script>
+                    <c:remove var="openLoginModal" scope="session"/>
+                </c:if>
+
+                <script>
+                    // Nút mở modal
+                    document.getElementById('loginBtn').addEventListener('click', function (e) {
+                        e.preventDefault();
+                        document.getElementById('modalContent').innerHTML = `
+            <div class="text-center py-3">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Đang tải...</span>
+                </div>
+            </div>
+        `;
+
+                        fetch('${pageContext.request.contextPath}/LoginControl?action=modal')
+                            .then(res => res.text())
+                            .then(html => {
+                                document.getElementById('modalContent').innerHTML = html;
+                                new bootstrap.Modal(document.getElementById('loginModal')).show();
+
+                                // Kích hoạt tab mặc định sau khi tải
+                                const loginTab = new bootstrap.Tab(document.getElementById('login-tab'));
+                                loginTab.show();
+                            })
+                            .catch(err => {
+                                console.error('Lỗi khi tải modal:', err);
+                                document.getElementById('modalContent').innerHTML = '<div class="alert alert-danger">Không thể tải form đăng nhập</div>';
+                            });
+                    });
+                </script>
+
             </div>
         </div>
     </div>
@@ -109,7 +216,8 @@
 <!-- Hero Section Begin -->
 <section class="hero">
     <div class="hero__slider owl-carousel">
-        <div class="hero__items set-bg" data-setbg="${pageContext.request.contextPath}/views/views_customer/img/hero/hero-3.jpg">
+        <div class="hero__items set-bg"
+             data-setbg="${pageContext.request.contextPath}/views/views_customer/img/hero/hero-3.jpg">
             <div class="container">
                 <div class="row">
                     <div class="col-xl-5 col-lg-7 col-md-8">
@@ -131,7 +239,8 @@
                 </div>
             </div>
         </div>
-        <div class="hero__items set-bg" data-setbg="${pageContext.request.contextPath}/views/views_customer/img/hero/hero-4.jpg">
+        <div class="hero__items set-bg"
+             data-setbg="${pageContext.request.contextPath}/views/views_customer/img/hero/hero-4.jpg">
             <div class="container">
                 <div class="row">
                     <div class="col-xl-5 col-lg-7 col-md-8">
@@ -223,16 +332,21 @@
                         <span class="label">Mới</span>
                         <ul class="product__hover">
                             <li>
-                                <a href="#"><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/heart.png" alt=""/></a>
+                                <a href="#"><img
+                                        src="${pageContext.request.contextPath}/views/views_customer/img/icon/heart.png"
+                                        alt=""/></a>
                             </li>
                             <li>
                                 <a href="#"
-                                ><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/compare.png" alt=""/>
+                                ><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/compare.png"
+                                      alt=""/>
                                     <span>So sánh</span></a
                                 >
                             </li>
                             <li>
-                                <a href="#"><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/search.png" alt=""/></a>
+                                <a href="#"><img
+                                        src="${pageContext.request.contextPath}/views/views_customer/img/icon/search.png"
+                                        alt=""/></a>
                             </li>
                         </ul>
                     </div>
@@ -271,16 +385,21 @@
                     >
                         <ul class="product__hover">
                             <li>
-                                <a href="#"><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/heart.png" alt=""/></a>
+                                <a href="#"><img
+                                        src="${pageContext.request.contextPath}/views/views_customer/img/icon/heart.png"
+                                        alt=""/></a>
                             </li>
                             <li>
                                 <a href="#"
-                                ><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/compare.png" alt=""/>
+                                ><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/compare.png"
+                                      alt=""/>
                                     <span>So sánh</span></a
                                 >
                             </li>
                             <li>
-                                <a href="#"><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/search.png" alt=""/></a>
+                                <a href="#"><img
+                                        src="${pageContext.request.contextPath}/views/views_customer/img/icon/search.png"
+                                        alt=""/></a>
                             </li>
                         </ul>
                     </div>
@@ -320,16 +439,21 @@
                         <span class="label">Giảm giá</span>
                         <ul class="product__hover">
                             <li>
-                                <a href="#"><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/heart.png" alt=""/></a>
+                                <a href="#"><img
+                                        src="${pageContext.request.contextPath}/views/views_customer/img/icon/heart.png"
+                                        alt=""/></a>
                             </li>
                             <li>
                                 <a href="#"
-                                ><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/compare.png" alt=""/>
+                                ><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/compare.png"
+                                      alt=""/>
                                     <span>So sánh</span></a
                                 >
                             </li>
                             <li>
-                                <a href="#"><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/search.png" alt=""/></a>
+                                <a href="#"><img
+                                        src="${pageContext.request.contextPath}/views/views_customer/img/icon/search.png"
+                                        alt=""/></a>
                             </li>
                         </ul>
                     </div>
@@ -368,16 +492,21 @@
                     >
                         <ul class="product__hover">
                             <li>
-                                <a href="#"><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/heart.png" alt=""/></a>
+                                <a href="#"><img
+                                        src="${pageContext.request.contextPath}/views/views_customer/img/icon/heart.png"
+                                        alt=""/></a>
                             </li>
                             <li>
                                 <a href="#"
-                                ><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/compare.png" alt=""/>
+                                ><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/compare.png"
+                                      alt=""/>
                                     <span>So sánh</span></a
                                 >
                             </li>
                             <li>
-                                <a href="#"><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/search.png" alt=""/></a>
+                                <a href="#"><img
+                                        src="${pageContext.request.contextPath}/views/views_customer/img/icon/search.png"
+                                        alt=""/></a>
                             </li>
                         </ul>
                     </div>
@@ -416,16 +545,21 @@
                     >
                         <ul class="product__hover">
                             <li>
-                                <a href="#"><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/heart.png" alt=""/></a>
+                                <a href="#"><img
+                                        src="${pageContext.request.contextPath}/views/views_customer/img/icon/heart.png"
+                                        alt=""/></a>
                             </li>
                             <li>
                                 <a href="#"
-                                ><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/compare.png" alt=""/>
+                                ><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/compare.png"
+                                      alt=""/>
                                     <span>So sánh</span></a
                                 >
                             </li>
                             <li>
-                                <a href="#"><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/search.png" alt=""/></a>
+                                <a href="#"><img
+                                        src="${pageContext.request.contextPath}/views/views_customer/img/icon/search.png"
+                                        alt=""/></a>
                             </li>
                         </ul>
                     </div>
@@ -465,16 +599,21 @@
                         <span class="label">Giảm giá</span>
                         <ul class="product__hover">
                             <li>
-                                <a href="#"><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/heart.png" alt=""/></a>
+                                <a href="#"><img
+                                        src="${pageContext.request.contextPath}/views/views_customer/img/icon/heart.png"
+                                        alt=""/></a>
                             </li>
                             <li>
                                 <a href="#"
-                                ><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/compare.png" alt=""/>
+                                ><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/compare.png"
+                                      alt=""/>
                                     <span>So sánh</span></a
                                 >
                             </li>
                             <li>
-                                <a href="#"><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/search.png" alt=""/></a>
+                                <a href="#"><img
+                                        src="${pageContext.request.contextPath}/views/views_customer/img/icon/search.png"
+                                        alt=""/></a>
                             </li>
                         </ul>
                     </div>
@@ -513,16 +652,21 @@
                     >
                         <ul class="product__hover">
                             <li>
-                                <a href="#"><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/heart.png" alt=""/></a>
+                                <a href="#"><img
+                                        src="${pageContext.request.contextPath}/views/views_customer/img/icon/heart.png"
+                                        alt=""/></a>
                             </li>
                             <li>
                                 <a href="#"
-                                ><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/compare.png" alt=""/>
+                                ><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/compare.png"
+                                      alt=""/>
                                     <span>So sánh</span></a
                                 >
                             </li>
                             <li>
-                                <a href="#"><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/search.png" alt=""/></a>
+                                <a href="#"><img
+                                        src="${pageContext.request.contextPath}/views/views_customer/img/icon/search.png"
+                                        alt=""/></a>
                             </li>
                         </ul>
                     </div>
@@ -561,16 +705,21 @@
                     >
                         <ul class="product__hover">
                             <li>
-                                <a href="#"><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/heart.png" alt=""/></a>
+                                <a href="#"><img
+                                        src="${pageContext.request.contextPath}/views/views_customer/img/icon/heart.png"
+                                        alt=""/></a>
                             </li>
                             <li>
                                 <a href="#"
-                                ><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/compare.png" alt=""/>
+                                ><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/compare.png"
+                                      alt=""/>
                                     <span>So sánh</span></a
                                 >
                             </li>
                             <li>
-                                <a href="#"><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/search.png" alt=""/></a>
+                                <a href="#"><img
+                                        src="${pageContext.request.contextPath}/views/views_customer/img/icon/search.png"
+                                        alt=""/></a>
                             </li>
                         </ul>
                     </div>
@@ -735,7 +884,7 @@
                 <div class="blog__item">
                     <div
                             class="blog__item__pic set-bg"
-                            data-setbg="img/blog/blog-2.jpg"
+                            data-setbg="${pageContext.request.contextPath}/views/views_customer/img/blog/blog-2.jpg"
                     ></div>
                     <div class="blog__item__text">
                 <span
@@ -792,7 +941,8 @@
                         Khách hàng là trung tâm của mô hình kinh doanh độc đáo của chúng
                         tôi, bao gồm thiết kế.
                     </p>
-                    <a href="#"><img src="${pageContext.request.contextPath}/views/views_customer/img/payment.png" alt=""/></a>
+                    <a href="#"><img src="${pageContext.request.contextPath}/views/views_customer/img/payment.png"
+                                     alt=""/></a>
                 </div>
             </div>
             <div class="col-lg-2 offset-lg-1 col-md-3 col-sm-6">
@@ -865,5 +1015,6 @@
 <script src="${pageContext.request.contextPath}/views/views_customer/js/mixitup.min.js"></script>
 <script src="${pageContext.request.contextPath}/views/views_customer/js/owl.carousel.min.js"></script>
 <script src="${pageContext.request.contextPath}/views/views_customer/js/main.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

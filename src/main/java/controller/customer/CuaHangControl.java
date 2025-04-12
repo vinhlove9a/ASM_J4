@@ -1,9 +1,6 @@
 package controller.customer;
 
-import entity.san.pham.KichThuoc;
-import entity.san.pham.MauSac;
-import entity.san.pham.SanPham;
-import entity.san.pham.ThuongHieu;
+import entity.san.pham.*;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
@@ -38,27 +35,51 @@ public class CuaHangControl extends HttpServlet {
     }
 
     private void hienThiCuaHang(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        int soSanPhamMoiTrang = 12;
-        int trangHienTai = 1;
+        int soSanPhamMoiTrang = 12; // Số sản phẩm mỗi trang
+        int trangHienTai = 1; // Trang hiện tại
         String page = request.getParameter("page");
         if (page != null) {
-            trangHienTai = Integer.parseInt(page);
+            try {
+                trangHienTai = Integer.parseInt(page);
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
         }
 
-        SanPhamRepository sanPhamRepository = new SanPhamRepository();
+        // Lấy tổng số sản phẩm từ cơ sở dữ liệu
         int tongSoSanPham = sanPhamRepository.getTongSoSanPham();
+
+        // Tính toán tổng số trang
         int tongSoTrang = (int) Math.ceil((double) tongSoSanPham / soSanPhamMoiTrang);
+
+        // Lấy danh sách sản phẩm dựa trên trang hiện tại
         List<SanPham> danhSachSanPham = sanPhamRepository.getSanPhamTheoTrang(trangHienTai, soSanPhamMoiTrang);
+
+        // Đảm bảo danh sách sản phẩm được làm mới từ cơ sở dữ liệu
+        for (SanPham sanPham : danhSachSanPham) {
+            ChiTietSanPham chiTietSanPham = sanPham.getChiTietSanPham();
+            System.out.println("Tên sản phẩm: " + sanPham.getTenSanPham());
+            System.out.println("Số lượng tồn kho: " + chiTietSanPham.getSoLuong());
+        }
+
+        // Truyền danh sách sản phẩm vào request
         request.setAttribute("danhSachSanPham", danhSachSanPham);
+
+        // Lấy danh sách thương hiệu, kích thước, màu sắc để hiển thị bộ lọc
         List<ThuongHieu> danhSachThuongHieu = thuongHieuRepository.getAllThuongHieu();
         request.setAttribute("danhSachThuongHieu", danhSachThuongHieu);
+
         List<KichThuoc> danhSachKichThuoc = kichThuocRepository.getAllKichThuoc();
         request.setAttribute("danhSachKichThuoc", danhSachKichThuoc);
+
         List<MauSac> danhSachMauSac = mauSacRepository.getAllMauSac();
         request.setAttribute("danhSachMauSac", danhSachMauSac);
+
+        // Truyền số trang hiện tại và tổng số trang vào request
         request.setAttribute("tongSoTrang", tongSoTrang);
         request.setAttribute("trangHienTai", trangHienTai);
 
+        // Điều hướng đến giao diện cửa hàng
         request.getRequestDispatcher("/views/views_customer/shop.jsp").forward(request, response);
     }
 
