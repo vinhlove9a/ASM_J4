@@ -165,7 +165,7 @@
                 </c:if>
 
                 <!-- Nếu cần mở modal -->
-                <c:if test="${sessionScope.openLoginModal == true}">
+                <c:if test="${not empty sessionScope.openLoginModal}">
                     <script>
                         window.addEventListener('DOMContentLoaded', () => {
                             fetch('${pageContext.request.contextPath}/LoginControl?action=modal')
@@ -177,7 +177,7 @@
                                 .catch(err => console.error('Lỗi khi tải modal:', err));
                         });
                     </script>
-                    <c:remove var="openLoginModal" scope="session"/>
+                    <c:remove var="openLoginModal" scope="session"/> <!-- Xóa trạng thái sau khi hiển thị -->
                 </c:if>
 
                 <script>
@@ -409,7 +409,6 @@
                                         <input type="hidden" name="soLuong" value="1"/>
                                         <button type="submit" class="btn btn-primary add-cart">+ Thêm vào giỏ hàng
                                         </button>
-
                                     </form>
                                     <div class="rating">
                                         <i class="fa fa-star-o"></i>

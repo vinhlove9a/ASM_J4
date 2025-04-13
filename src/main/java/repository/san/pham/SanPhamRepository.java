@@ -31,7 +31,19 @@ public class SanPhamRepository {
         }
         return sanPhams;
     }
-
+    public SanPham getOne(Integer id){
+        return session.find(SanPham.class, id);
+    }
+    public void add(SanPham sanPham) {
+        try {
+            session.getTransaction().begin();
+            session.save(sanPham);
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+            session.getTransaction().rollback();
+        }
+    }
     public int getTongSoSanPham() {
         try (Session session = HibernateUtil.getFACTORY().openSession()) {
             String hql = "SELECT COUNT(*) FROM SanPham";

@@ -9,6 +9,32 @@ import java.util.Date;
 import java.util.List;
 
 public class KhachHangRepository {
+    public Session session;
+
+    public KhachHangRepository() {
+        session = HibernateUtil.getFACTORY().openSession();
+    }
+
+    public List<KhachHang> getAll() {
+        return session.createQuery("from KhachHang ").list();
+    }
+
+    public KhachHang getOne(Integer id) {
+        return session.find(KhachHang.class, id);
+    }
+
+    public boolean add(KhachHang khachHang) {
+        try {
+            session.getTransaction().begin();
+            session.save(khachHang);
+            session.getTransaction().commit();
+            return true;
+        } catch (Exception e) {
+            session.getTransaction().rollback();
+            e.printStackTrace();
+        }
+        return false;
+    }
 
     // Phương thức đăng ký khách hàng (có sẵn)
     public static boolean dangKyKhachHang(String tenKhachHang, String soDienThoai, String diaChi,
@@ -137,17 +163,28 @@ public class KhachHangRepository {
             return false;
         }
     }
+
     public void save(KhachHang khachHang) {
         Transaction giaoDich = null;
-        try (Session phien = HibernateUtil.getFACTORY().openSession()) {
+        Session phien = null;
+
+        try {
+            phien = HibernateUtil.getFACTORY().openSession();
             giaoDich = phien.beginTransaction();
             phien.saveOrUpdate(khachHang);
-            giaoDich.commit();
+            giaoDich.commit(); // Commit giao dịch nếu thành công
         } catch (Exception loi) {
-            if (giaoDich != null) giaoDich.rollback();
+            if (giaoDich != null && giaoDich.isActive()) {
+                giaoDich.rollback(); // Rollback nếu xảy ra lỗi
+            }
             loi.printStackTrace();
+        } finally {
+            if (phien != null && phien.isOpen()) {
+                phien.close(); // Đóng Session để giải phóng tài nguyên
+            }
         }
     }
+
     // Phương thức lấy tất cả khách hàng
     public List<KhachHang> getAllKhachHang() {
         try (Session phien = HibernateUtil.getFACTORY().openSession()) {
@@ -156,5 +193,19 @@ public class KhachHangRepository {
             loi.printStackTrace();
             return null;
         }
+    }
+
+    public static boolean isPhoneExist(String phone) {
+        boolean exists = false;
+        try (Session session = HibernateUtil.getFACTORY().openSession()) {
+            String hql = "SELECT COUNT(*) FROM KhachHang WHERE sdt = :phone";
+            Long count = session.createQuery(hql, Long.class)
+                    .setParameter("phone", phone)
+                    .uniqueResult();
+            exists = count != null && count > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return exists;
     }
 }

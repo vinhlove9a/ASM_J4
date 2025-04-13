@@ -96,9 +96,11 @@
                 <a href="#" class="search-switch"
                 ><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/search.png" alt=""
                 /></a>
-                <a href="#"><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/heart.png" alt=""/></a>
+                <a href="#"><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/heart.png"
+                                 alt=""/></a>
                 <a href="#"
-                ><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/cart.png" alt=""/> <span>0</span></a
+                ><img src="${pageContext.request.contextPath}/views/views_customer/img/icon/cart.png" alt=""/>
+                    <span>0</span></a
                 >
 
                 <!-- Modal -->
@@ -161,7 +163,7 @@
                 </c:if>
 
                 <!-- Nếu cần mở modal -->
-                <c:if test="${sessionScope.openLoginModal == true}">
+                <c:if test="${not empty sessionScope.openLoginModal}">
                     <script>
                         window.addEventListener('DOMContentLoaded', () => {
                             fetch('${pageContext.request.contextPath}/LoginControl?action=modal')
@@ -173,7 +175,7 @@
                                 .catch(err => console.error('Lỗi khi tải modal:', err));
                         });
                     </script>
-                    <c:remove var="openLoginModal" scope="session"/>
+                    <c:remove var="openLoginModal" scope="session"/> <!-- Xóa trạng thái sau khi hiển thị -->
                 </c:if>
 
                 <script>
@@ -241,23 +243,27 @@
                         <h6 class="checkout__title">Thông tin khách hàng</h6>
                         <div class="checkout__input">
                             <p>Mã khách hàng</p>
-                            <input type="text" name="maKhachHang" id="maKhachHang" placeholder="Hệ thống tạo tự động" readonly />
+                            <input type="text" name="maKhachHang" id="maKhachHang" placeholder="Hệ thống tạo tự động"
+                                   readonly/>
                         </div>
                         <div class="checkout__input">
                             <p>Họ và tên</p>
-                            <input type="text" name="hoKhachHang" id="hoKhachHang" placeholder="Nhập họ và tên" required />
+                            <input type="text" name="hoKhachHang" id="hoKhachHang" placeholder="Nhập họ và tên"
+                                   required/>
                         </div>
                         <div class="checkout__input">
                             <p>Địa chỉ</p>
-                            <input type="text" name="diaChi" id="diaChi" placeholder="Nhập địa chỉ" required />
+                            <input type="text" name="diaChi" id="diaChi" placeholder="Nhập địa chỉ" required/>
                         </div>
                         <div class="checkout__input">
                             <p>Số điện thoại</p>
-                            <input type="text" name="soDienThoai" id="soDienThoai" placeholder="Nhập số điện thoại" required />
+                            <input type="text" name="soDienThoai" id="soDienThoai" placeholder="Nhập số điện thoại"
+                                   required/>
                         </div>
                         <div class="checkout__input">
                             <p>Phương thức thanh toán</p>
-                            <select name="phuongThucThanhToan" id="phuongThucThanhToan" onchange="handlePaymentMethod(this.value)" required>
+                            <select name="phuongThucThanhToan" id="phuongThucThanhToan"
+                                    onchange="handlePaymentMethod(this.value)" required>
                                 <option value="COD">Thanh toán khi nhận hàng</option>
                                 <option value="Paypal">Thanh toán qua Paypal</option>
                             </select>
@@ -270,7 +276,8 @@
                             <h4 class="order__title">Đơn hàng</h4>
                             <ul class="checkout__total__products">
                                 <c:forEach var="item" items="${cartItems}">
-                                    <li>${item.sanPham.tenSanPham} x ${item.soLuong} <span>${item.soLuong * item.sanPham.chiTietSanPham.donGia} VNĐ</span></li>
+                                    <li>${item.sanPham.tenSanPham} x ${item.soLuong}
+                                        <span>${item.soLuong * item.sanPham.chiTietSanPham.donGia} VNĐ</span></li>
                                 </c:forEach>
                             </ul>
                             <ul class="checkout__total__all">

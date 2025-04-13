@@ -5,7 +5,33 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import utility.HibernateUtil;
 
+import java.util.List;
+
 public class ChiTietSanPhamRepository {
+    public Session session;
+
+    public ChiTietSanPhamRepository() {
+        session = HibernateUtil.getFACTORY().openSession();
+    }
+
+    public List<ChiTietSanPham> getAllChiTietSanPham() {
+        return session.createQuery("from ChiTietSanPham ").list();
+    }
+
+    public ChiTietSanPham getOne(Integer id) {
+        return session.find(ChiTietSanPham.class, id);
+    }
+
+    public void add(ChiTietSanPham chiTietSanPham) {
+        try {
+            session.getTransaction().begin();
+            session.save(chiTietSanPham);
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+            session.getTransaction().rollback();
+        }
+    }
 
     public void update(ChiTietSanPham chiTietSanPham) {
         Transaction transaction = null;

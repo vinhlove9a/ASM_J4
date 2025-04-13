@@ -9,6 +9,8 @@ import repository.khachhang.KhachHangRepository;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @WebServlet(name = "LoginControl", value = "/LoginControl")
 public class LoginControl extends HttpServlet {
@@ -55,76 +57,66 @@ public class LoginControl extends HttpServlet {
 
         HttpSession session = request.getSession();
 
+        // Đăng nhập Khách hàng
         KhachHang khachHang = KhachHangRepository.dangNhapKhachHang(username, password);
-
         if (khachHang != null) {
-            // Đăng nhập thành công
-            session.setAttribute("user", khachHang);
+            session.setAttribute("userRole", "KHACH_HANG"); // Đánh dấu vai trò
+            session.setAttribute("user", khachHang); // Lưu thông tin khách hàng
             session.setAttribute("success", "Đăng nhập thành công!");
             response.sendRedirect("/trang-chu/hien-thi");
-        } else {
-            // Đăng nhập thất bại
-            session.setAttribute("error", "Tài khoản hoặc mật khẩu không chính xác!");
-            session.setAttribute("openLoginModal", true);
-            response.sendRedirect("/trang-chu/hien-thi");
+            return;
         }
+
+        // Đăng nhập Nhân viên
+
+        // Đăng nhập thất bại
+        session.setAttribute("error", "Tài khoản hoặc mật khẩu không chính xác!");
+        session.setAttribute("openLoginModal", true);
+        response.sendRedirect("/trang-chu/hien-thi");
     }
 
-    private void xuLyDangKy(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void xuLyDangKy(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         HttpSession session = request.getSession();
+        Map<String, String> errors = new HashMap<>();
 
-        try {
-            String name = request.getParameter("name");
-            String phone = request.getParameter("phone");
-            String address = request.getParameter("address");
-            String password = request.getParameter("password");
-            String genderStr = request.getParameter("gender");
-            String birthdateStr = request.getParameter("birthdate");
+        String name = request.getParameter("name");
+        String phone = request.getParameter("phone");
+        String address = request.getParameter("address");
+        String password = request.getParameter("password");
+        String gender = request.getParameter("gender");
 
-            // Kiểm tra các trường bắt buộc không được để trống
-            if (name == null || name.trim().isEmpty() ||
-                    phone == null || phone.trim().isEmpty() ||
-                    password == null || password.trim().isEmpty() ||
-                    genderStr == null || genderStr.trim().isEmpty()) {
-                session.setAttribute("error", "Các trường bắt buộc không được để trống!");
-                session.setAttribute("openLoginModal", true);
-                response.sendRedirect("/trang-chu/hien-thi");
-                return;
-            }
-
-            // Kiểm tra định dạng số điện thoại
-            if (!phone.matches("\\d{10}")) {
-                session.setAttribute("error", "Số điện thoại phải có 10 chữ số!");
-                session.setAttribute("openLoginModal", true);
-                response.sendRedirect("/trang-chu/hien-thi");
-                return;
-            }
-
-            int gender = Integer.parseInt(genderStr);
-            Date birthdate = null;
-            if (birthdateStr != null && !birthdateStr.trim().isEmpty()) {
-                birthdate = new SimpleDateFormat("yyyy-MM-dd").parse(birthdateStr);
-            }
-
-            boolean result = KhachHangRepository.dangKyKhachHang(name, phone, address, password, gender, birthdate);
-
-            if (result) {
-                session.setAttribute("success", "Đăng ký thành công! Vui lòng đăng nhập.");
-            } else {
-                session.setAttribute("error", "Số điện thoại đã tồn tại!");
-            }
-            session.setAttribute("openLoginModal", true);
-            response.sendRedirect("/trang-chu/hien-thi");
-
-        } catch (NumberFormatException e) {
-            session.setAttribute("error", "Dữ liệu không hợp lệ!");
-            session.setAttribute("openLoginModal", true);
-            response.sendRedirect("/trang-chu/hien-thi");
-        } catch (Exception e) {
-            e.printStackTrace();
-            session.setAttribute("error", "Đã xảy ra lỗi khi xử lý đăng ký!");
-            session.setAttribute("openLoginModal", true);
-            response.sendRedirect("/trang-chu/hien-thi");
+        // Kiểm tra các trường bắt buộc
+        if (name == null || name.trim().isEmpty()) {
+            errors.put("name", "Tên không được để trống!");
         }
+        if (phone == null || phone.trim().isEmpty()) {
+            errors.put("phone", "Số điện thoại không được để trống!");
+        } else if (!phone.matches("\\d{10}")) {
+            errors.put("phone", "Số điện thoại phải có 10 chữ số!");
+        } else if (KhachHangRepository.isPhoneExist(phone)) {
+            errors.put("phone", "Số điện thoại đã tồn tại!");
+        }
+        if (password == null || password.trim().isEmpty()) {
+            errors.put("password", "Mật khẩu không được để trống!");
+        }
+        if (gender == null) {
+            errors.put("gender", "Vui lòng chọn giới tính!");
+        }
+
+        if (!errors.isEmpty()) {
+            session.setAttribute("errors", errors); // Lưu lỗi vào session
+            session.setAttribute("openLoginModal", true); // Kích hoạt modal
+            response.sendRedirect("/trang-chu/hien-thi"); // Chuyển hướng về index.jsp
+            return;
+        }
+
+        // Xử lý đăng ký nếu không có lỗi
+        boolean result = KhachHangRepository.dangKyKhachHang(name, phone, address, password, Integer.parseInt(gender), null);
+        if (result) {
+            session.setAttribute("success", "Đăng ký thành công! Vui lòng đăng nhập.");
+        } else {
+            session.setAttribute("error", "Đã xảy ra lỗi khi xử lý đăng ký!");
+        }
+        response.sendRedirect("/trang-chu/hien-thi");
     }
 }

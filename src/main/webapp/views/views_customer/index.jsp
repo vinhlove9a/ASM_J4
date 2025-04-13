@@ -34,6 +34,8 @@
           type="text/css"/>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/views/views_customer/css/style.css"
           type="text/css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+
 </head>
 
 <body>
@@ -42,6 +44,12 @@
     <div class="loader"></div>
 </div>
 <div class="container">
+    <c:if test="${not empty sessionScope.successMessage}">
+        <div class="alert alert-success animate__animated animate__fadeInDown" role="alert">
+                ${sessionScope.successMessage}
+        </div>
+        <c:set var="successMessage" value="" scope="session"/>
+    </c:if>
     <div class="row">
         <div class="col-lg-3 col-md-3">
             <div class="header__logo">
@@ -162,7 +170,7 @@
                 </c:if>
 
                 <!-- Nếu cần mở modal -->
-                <c:if test="${sessionScope.openLoginModal == true}">
+                <c:if test="${not empty sessionScope.openLoginModal}">
                     <script>
                         window.addEventListener('DOMContentLoaded', () => {
                             fetch('${pageContext.request.contextPath}/LoginControl?action=modal')
@@ -174,7 +182,7 @@
                                 .catch(err => console.error('Lỗi khi tải modal:', err));
                         });
                     </script>
-                    <c:remove var="openLoginModal" scope="session"/>
+                    <c:remove var="openLoginModal" scope="session"/> <!-- Xóa trạng thái sau khi hiển thị -->
                 </c:if>
 
                 <script>
@@ -1016,5 +1024,7 @@
 <script src="${pageContext.request.contextPath}/views/views_customer/js/owl.carousel.min.js"></script>
 <script src="${pageContext.request.contextPath}/views/views_customer/js/main.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

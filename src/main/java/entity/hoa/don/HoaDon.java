@@ -31,7 +31,7 @@ public class HoaDon {
     @JoinColumn(name = "IDPhieuGiamGia", referencedColumnName = "id")
     private PhieuGiamGia phieuGiamGia;
 
-    @Column(name = "MaHoaDon", unique = true, nullable = false)
+    @Column(name = "MaHoaDon", insertable = false, updatable = false) // Hibernate không kiểm tra MaHoaDon
     private String maHoaDon;
 
     @Column(name = "TongTien", nullable = false)

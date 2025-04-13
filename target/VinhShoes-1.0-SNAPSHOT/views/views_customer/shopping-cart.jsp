@@ -164,7 +164,7 @@
                 </c:if>
 
                 <!-- Nếu cần mở modal -->
-                <c:if test="${sessionScope.openLoginModal == true}">
+                <c:if test="${not empty sessionScope.openLoginModal}">
                     <script>
                         window.addEventListener('DOMContentLoaded', () => {
                             fetch('${pageContext.request.contextPath}/LoginControl?action=modal')
@@ -176,7 +176,7 @@
                                 .catch(err => console.error('Lỗi khi tải modal:', err));
                         });
                     </script>
-                    <c:remove var="openLoginModal" scope="session"/>
+                    <c:remove var="openLoginModal" scope="session"/> <!-- Xóa trạng thái sau khi hiển thị -->
                 </c:if>
 
                 <script>
@@ -301,7 +301,8 @@
 
                                     <!-- Hành động xóa sản phẩm -->
                                     <td>
-                                        <a href="${pageContext.request.contextPath}/gio-hang/xoa?productId=${item.sanPham.id}&quantityToRemove=1" class="btn btn-danger">
+                                        <a href="${pageContext.request.contextPath}/gio-hang/xoa?productId=${item.sanPham.id}&quantityToRemove=1"
+                                           class="btn btn-danger">
                                             <i class="fa fa-trash"></i> Xóa
                                         </a>
                                     </td>

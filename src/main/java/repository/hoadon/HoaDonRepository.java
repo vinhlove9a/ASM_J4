@@ -43,15 +43,25 @@ public class HoaDonRepository {
     }
 
     // Lưu hóa đơn mới
-    public void luuHoaDon(HoaDon hoaDon) {
+    public boolean luuHoaDon(HoaDon hoaDon) {
         Transaction transaction = null;
-        try (Session session = HibernateUtil.getFACTORY().openSession()) {
+        Session session = null;
+        try {
+            session = HibernateUtil.getFACTORY().openSession();
             transaction = session.beginTransaction();
-            session.save(hoaDon); // Lưu hóa đơn mới
+            session.save(hoaDon); // Không cần gán MaHoaDon, để SQL tự xử lý
             transaction.commit();
+            return true;
         } catch (Exception e) {
-            if (transaction != null) transaction.rollback();
+            if (transaction != null) {
+                transaction.rollback();
+            }
             e.printStackTrace();
+            return false;
+        } finally {
+            if (session != null) {
+                session.close();
+            }
         }
     }
 
@@ -107,5 +117,35 @@ public class HoaDonRepository {
             e.printStackTrace();
             return null;
         }
+    }
+    public boolean existsByMaHoaDon(String maHoaDon) {
+        // Kiểm tra xem MaHoaDon đã tồn tại hay chưa
+        return session.createQuery("SELECT COUNT(h) FROM HoaDon h WHERE h.maHoaDon = :maHoaDon", Long.class)
+                .setParameter("maHoaDon", maHoaDon)
+                .getSingleResult() > 0;
+    }
+    public List<HoaDon> getHoaDonByKhachHang(int khachHangId) {
+        List<HoaDon> hoaDons = null;
+        try (Session session = HibernateUtil.getFACTORY().openSession()) {
+            String hql = "FROM HoaDon WHERE khachHang.id = :khachHangId ORDER BY ngayTao DESC"; // Sắp xếp theo ngày tạo
+            hoaDons = session.createQuery(hql, HoaDon.class)
+                    .setParameter("khachHangId", khachHangId)
+                    .getResultList();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return hoaDons;
+    }
+    public List<HoaDon> getHoaDonBySdt(String soDienThoai) {
+        List<HoaDon> hoaDons = null;
+        try (Session session = HibernateUtil.getFACTORY().openSession()) {
+            String hql = "FROM HoaDon WHERE khachHang.sdt = :soDienThoai ORDER BY ngayTao DESC";
+            hoaDons = session.createQuery(hql, HoaDon.class)
+                    .setParameter("soDienThoai", soDienThoai)
+                    .getResultList();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return hoaDons;
     }
 }
