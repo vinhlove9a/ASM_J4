@@ -14,7 +14,7 @@ public class SanPham {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "MaSanPham", unique = true, nullable = false)
+    @Column(name = "MaSanPham", unique = true, nullable = false, insertable = false, updatable = false)
     private String maSanPham;
 
     @Column(name = "TenSanPham", nullable = false)

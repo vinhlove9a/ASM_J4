@@ -8,7 +8,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
-import repository.nhanvien.NhanVienRepository;
+import repository.customer.nhanvien.NhanVienRepository;
 
 import java.io.File;
 import java.io.IOException;

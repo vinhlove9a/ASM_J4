@@ -4,11 +4,9 @@ import entity.khach.hang.KhachHang;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
-import repository.khachhang.KhachHangRepository;
+import repository.customer.khachhang.KhachHangRepository;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 

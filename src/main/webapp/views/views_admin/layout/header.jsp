@@ -42,7 +42,6 @@
                 <a href="${pageContext.request.contextPath}/thuonghieu"><i class="fas fa-trademark me-2"></i> Quản lý thương hiệu</a>
                 <a href="${pageContext.request.contextPath}/mausac"><i class="fas fa-palette me-2"></i> Quản lý màu sắc</a>
                 <a href="${pageContext.request.contextPath}/kichthuoc"><i class="fas fa-ruler me-2"></i> Quản lý kích thước</a>
-                <a href="${pageContext.request.contextPath}/chitietsanpham"><i class="fas fa-info-circle me-2"></i> Chi tiết sản phẩm</a>
                 <a href="${pageContext.request.contextPath}/phieugiamgia"><i class="fas fa-tag me-2"></i> Phiếu giảm giá</a>
                 <a href="${pageContext.request.contextPath}/hoadon"><i class="fas fa-file-invoice me-2"></i> Quản lý hóa đơn</a>
                 <a href="${pageContext.request.contextPath}/chucvu"><i class="fas fa-sitemap me-2"></i> Quản lý chức vụ</a>
@@ -50,3 +49,4 @@
             </div>
         </div>
         <div class="col-md-10 content">
+            <!-- Nội dung chính sẽ được hiển thị ở đây -->

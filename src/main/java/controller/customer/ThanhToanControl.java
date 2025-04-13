@@ -8,9 +8,9 @@ import entity.san.pham.ChiTietSanPham;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
-import repository.hoadon.HoaDonRepository;
-import repository.khachhang.KhachHangRepository;
-import repository.san.pham.ChiTietSanPhamRepository;
+import repository.customer.hoadon.HoaDonRepository;
+import repository.customer.khachhang.KhachHangRepository;
+import repository.customer.sanpham.ChiTietSanPhamRepository;
 
 import java.io.IOException;
 import java.util.Date;

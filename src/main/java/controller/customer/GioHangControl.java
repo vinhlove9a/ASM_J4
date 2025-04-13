@@ -6,10 +6,10 @@ import entity.san.pham.SanPham;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
-import repository.giohang.GioHangChiTietRepository;
-import repository.giohang.GioHangRepository;
-import repository.san.pham.ChiTietSanPhamRepository;
-import repository.san.pham.SanPhamRepository;
+import repository.customer.giohang.GioHangChiTietRepository;
+import repository.customer.giohang.GioHangRepository;
+import repository.customer.sanpham.ChiTietSanPhamRepository;
+import repository.customer.sanpham.SanPhamRepository;
 
 import java.io.IOException;
 import java.util.ArrayList;

@@ -8,7 +8,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
-import repository.khachhang.KhachHangRepository;
+import repository.customer.khachhang.KhachHangRepository;
 
 import java.io.File;
 import java.io.IOException;

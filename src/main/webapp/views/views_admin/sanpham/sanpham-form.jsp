@@ -6,7 +6,7 @@
             <h3>${sanPham.id != null ? 'Cập nhật sản phẩm' : 'Thêm sản phẩm mới'}</h3>
         </div>
         <div class="card-body">
-            <form action="${pageContext.request.contextPath}/sanpham/save" method="post" enctype="multipart/form-data">
+            <form action="${pageContext.request.contextPath}/admin/sanpham/save" method="post" enctype="multipart/form-data">
                 <input type="hidden" name="id" value="${sanPham.id}" />
                 <input type="hidden" name="idChiTietSanPham" value="${sanPham.chiTietSanPham.id}" />
 
@@ -30,7 +30,7 @@
                             <option value="">-- Chọn thương hiệu --</option>
                             <c:forEach var="th" items="${danhSachThuongHieu}">
                                 <option value="${th.id}" ${sanPham.chiTietSanPham.thuongHieu.id == th.id ? 'selected' : ''}>
-                                        ${th.tenTH}
+                                        ${th.tenThuongHieu}
                                 </option>
                             </c:forEach>
                         </select>
@@ -41,7 +41,7 @@
                             <option value="">-- Chọn màu sắc --</option>
                             <c:forEach var="ms" items="${danhSachMauSac}">
                                 <option value="${ms.id}" ${sanPham.chiTietSanPham.mauSac.id == ms.id ? 'selected' : ''}>
-                                        ${ms.tenMS}
+                                        ${ms.tenMauSac}
                                 </option>
                             </c:forEach>
                         </select>
@@ -52,7 +52,7 @@
                             <option value="">-- Chọn kích thước --</option>
                             <c:forEach var="kt" items="${danhSachKichThuoc}">
                                 <option value="${kt.id}" ${sanPham.chiTietSanPham.kichThuoc.id == kt.id ? 'selected' : ''}>
-                                        ${kt.tenKT}
+                                        ${kt.tenKichThuoc}
                                 </option>
                             </c:forEach>
                         </select>
@@ -100,7 +100,7 @@
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save me-2"></i>Lưu
                     </button>
-                    <a href="${pageContext.request.contextPath}/sanpham" class="btn btn-secondary ms-2">
+                    <a href="${pageContext.request.contextPath}/admin/sanpham" class="btn btn-secondary ms-2">
                         <i class="fas fa-arrow-left me-2"></i>Quay lại
                     </a>
                 </div>

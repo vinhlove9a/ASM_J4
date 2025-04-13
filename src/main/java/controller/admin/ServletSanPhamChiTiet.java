@@ -10,11 +10,11 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import repository.san.pham.ChiTietSanPhamRepository;
-import repository.san.pham.SanPhamRepository;
-import repository.san.pham.KichThuocRepository;
-import repository.san.pham.MauSacRepository;
-import repository.san.pham.ThuongHieuRepository;
+import repository.customer.sanpham.ChiTietSanPhamRepository;
+import repository.customer.sanpham.SanPhamRepository;
+import repository.customer.sanpham.KichThuocRepository;
+import repository.customer.sanpham.MauSacRepository;
+import repository.customer.sanpham.ThuongHieuRepository;
 
 import java.io.IOException;
 import java.util.List;
